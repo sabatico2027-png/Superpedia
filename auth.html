@@ -2,747 +2,597 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080d18">
-  <meta name="description" content="سوبر بيديا، الموسوعة المعرفية والتقنية العربية.">
-  <title>الحساب | SuperPedia</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <title>تسجيل الدخول | SuperPedia</title>
+  <meta name="description" content="سجّل دخولك إلى سوبر بيديا، الموسوعة المعرفية العربية.">
 
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { tajawal: ['Tajawal', 'sans-serif'] }
-        }
-      }
-    };
-  </script>
 
   <style>
     * { box-sizing: border-box; }
-    html { color-scheme: dark; }
     body {
-      margin: 0;
-      font-family: Tajawal, sans-serif;
+      font-family: 'Tajawal', sans-serif;
       background:
-        radial-gradient(ellipse at 15% 10%, #25245555, transparent 42%),
-        radial-gradient(ellipse at 85% 90%, #0d665333, transparent 40%),
-        #080d18;
-      color: #f1f5f9;
+        radial-gradient(ellipse at 50% 0%, rgba(59,130,246,.17), transparent 55%),
+        #080d19;
+      color: #eef2ff;
       min-height: 100vh;
     }
-    .glass {
-      background: rgba(16,24,39,.91);
+    .panel {
+      background: rgba(15, 23, 42, .88);
       border: 1px solid rgba(148,163,184,.16);
-      box-shadow: 0 24px 80px #0004;
-      backdrop-filter: blur(18px);
+      box-shadow: 0 25px 80px rgba(0,0,0,.35);
+      backdrop-filter: blur(16px);
     }
     .field {
       width: 100%;
-      min-height: 49px;
-      padding: 12px 14px;
-      background: #0b1220;
-      border: 1px solid #2b374c;
+      background: #0b1222;
+      border: 1px solid #29354b;
+      color: #f8fafc;
       border-radius: 12px;
-      color: white;
+      padding: 13px 14px;
       outline: none;
-      transition: .2s;
+      transition: border-color .2s, box-shadow .2s;
     }
     .field:focus {
-      border-color: #818cf8;
-      box-shadow: 0 0 0 3px #818cf822;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96,165,250,.12);
     }
-    .field::placeholder { color: #64748b; }
-    .primary {
+    .field::placeholder { color: #718096; }
+    .oauth-btn {
       width: 100%;
       min-height: 49px;
       border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      padding: 12px;
+      font-weight: 700;
+      transition: transform .15s, background .15s, border-color .15s;
+    }
+    .oauth-btn:hover { transform: translateY(-1px); }
+    .google-btn { background: #fff; color: #172033; }
+    .google-btn:hover { background: #f1f5f9; }
+    .apple-btn {
+      background: #05070b;
+      border: 1px solid #354052;
+      color: #fff;
+    }
+    .apple-btn:hover { background: #151b28; }
+    .email-btn {
+      background: #172b50;
+      border: 1px solid #294a7d;
+      color: #fff;
+    }
+    .email-btn:hover { background: #203b69; }
+    .primary-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      background: linear-gradient(100deg,#2563eb,#4f46e5);
       color: white;
       font-weight: 800;
-      background: linear-gradient(110deg,#818cf8,#6366f1);
-      transition: .2s;
+      transition: opacity .2s;
     }
-    .primary:hover:not(:disabled) { transform: translateY(-1px); }
-    .primary:disabled { opacity: .6; cursor: wait; }
-    .tab {
-      padding: 12px 8px;
-      border-radius: 10px;
-      font-weight: 700;
-      color: #94a3b8;
+    .primary-btn:hover { opacity: .9; }
+    .primary-btn:disabled, .oauth-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+      transform: none;
     }
-    .tab.active { background: #273149; color: white; }
-    .notice {
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 18px;
-      font-size: 14px;
-      line-height: 1.9;
-      overflow-wrap: anywhere;
-    }
-    .error {
-      background: #7f1d1d33;
-      border: 1px solid #f8717144;
-      color: #fca5a5;
-    }
-    .success {
-      background: #065f4633;
-      border: 1px solid #34d39944;
-      color: #6ee7b7;
-    }
-    .info {
-      background: #1e3a8a33;
-      border: 1px solid #818cf844;
-      color: #c7d2fe;
-    }
-    .hidden-panel { display: none !important; }
-    .strength {
-      height: 4px;
-      background: #263247;
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-    .strength > div {
-      height: 100%;
-      width: 0;
-      transition: .2s;
-    }
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #ffffff55;
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: middle;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    button:focus-visible, a:focus-visible, input:focus-visible {
-      outline: 2px solid #a5b4fc;
+    .hidden-section { display: none !important; }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid #60a5fa;
       outline-offset: 3px;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *,*::before,*::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-      }
     }
   </style>
 </head>
 
-<body>
-  <header class="border-b border-white/5">
-    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
-      <a href="index.html" class="flex items-center gap-3 no-underline text-white">
-        <div class="w-11 h-11 rounded-2xl bg-indigo-400/10 border border-indigo-300/20 flex items-center justify-center">
-          <svg viewBox="0 0 40 40" width="30" height="30" fill="none" aria-hidden="true">
-            <path d="M7 11L20 4L33 11V29L20 36L7 29V11Z" stroke="#A5B4FC" stroke-width="2"/>
-            <path d="M13 25V15L20 22L27 15V25" stroke="#5EEAD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div>
-          <div class="font-extrabold text-xl">SuperPedia</div>
-          <div class="text-xs text-slate-400">الموسوعة المعرفية العربية</div>
-        </div>
-      </a>
-      <a href="index.html" class="text-sm text-slate-400 hover:text-white">الرئيسية ←</a>
-    </div>
+<body class="flex flex-col">
+  <header class="w-full max-w-6xl mx-auto px-5 py-5 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-3" aria-label="العودة إلى الصفحة الرئيسية">
+      <div class="w-11 h-11 rounded-2xl bg-blue-600 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-blue-950/40">S</div>
+      <div>
+        <div class="text-xl font-extrabold tracking-wide">SuperPedia</div>
+        <div class="text-xs text-slate-400">الموسوعة المعرفية العربية</div>
+      </div>
+    </a>
+    <a href="index.html" class="text-sm text-slate-300 hover:text-white">الرئيسية ←</a>
   </header>
 
-  <main class="min-h-[calc(100vh-140px)] flex items-center justify-center px-4 py-10">
-    <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-10 items-center">
-
-      <section class="hidden lg:block">
-        <div class="inline-flex items-center gap-2 rounded-full px-4 py-2 border border-indigo-300/20 bg-indigo-400/10 text-indigo-200 text-sm mb-7">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          بوابتك إلى المعرفة
+  <main class="flex-1 flex items-center justify-center px-4 py-8">
+    <section class="panel w-full max-w-md rounded-3xl p-6 sm:p-8">
+      <div class="text-center mb-7">
+        <div class="mx-auto mb-4 w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21V5.5Z" stroke="#60A5FA" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M4 6v15M8 7h8M8 11h8M8 15h5" stroke="#60A5FA" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
         </div>
-        <h1 class="text-5xl xl:text-6xl font-extrabold leading-tight mb-6">
-          المعرفة تبدأ
-          <span class="block text-transparent bg-clip-text bg-gradient-to-l from-teal-300 to-indigo-400">بخطوة واحدة.</span>
-        </h1>
-        <p class="text-slate-400 text-lg leading-9 max-w-md">
-          سجّل دخولك إلى سوبر بيديا، واكتشف موسوعة عربية تجمع المعرفة والعلوم والتقنية في تجربة واحدة.
+        <h1 id="page-title" class="text-2xl font-extrabold mb-2">مرحبًا بك في سوبر بيديا</h1>
+        <p id="page-subtitle" class="text-slate-400 text-sm leading-7">اختر الطريقة المناسبة للدخول إلى حسابك ومتابعة رحلتك المعرفية.</p>
+      </div>
+
+      <div id="notice" class="hidden-section mb-5 rounded-xl border px-4 py-3 text-sm leading-6" role="status" aria-live="polite"></div>
+
+      <!-- خيارات الدخول الاجتماعي -->
+      <div id="social-section" class="space-y-3">
+        <button id="google-login" class="oauth-btn google-btn" type="button">
+          <svg width="21" height="21" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z" transform="translate(0 5)"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 38.02 46.98 31.84 46.98 24.55Z"/>
+            <path fill="#FBBC05" d="M10.53 28.59a14.4 14.4 0 0 1 0-9.18l-7.98-6.19a23.9 23.9 0 0 0 0 21.56l7.98-6.19Z" transform="translate(0 -1)"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z" transform="translate(0 -3)"/>
+          </svg>
+          <span>المتابعة باستخدام Google</span>
+        </button>
+
+        <button id="apple-login" class="oauth-btn apple-btn" type="button">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16.37 12.15c.02 2.2 1.93 2.93 1.95 2.94-.02.05-.31 1.06-1.02 2.1-.61.9-1.25 1.8-2.25 1.82-.98.02-1.3-.59-2.43-.59-1.13 0-1.48.57-2.4.61-.96.04-1.69-.97-2.31-1.87-1.26-1.83-2.22-5.18-.93-7.44.64-1.12 1.79-1.83 3.03-1.85.95-.02 1.84.65 2.43.65.59 0 1.7-.8 2.86-.68.49.02 1.87.2 2.75 1.5-.07.05-1.64.96-1.68 2.81ZM14.49 5.8c.51-.62.85-1.48.76-2.34-.74.03-1.63.49-2.16 1.1-.47.54-.88 1.42-.77 2.26.82.06 1.66-.41 2.17-1.02Z"/>
+          </svg>
+          <span>المتابعة باستخدام Apple</span>
+        </button>
+
+        <button id="email-choice" class="oauth-btn email-btn" type="button">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.7"/>
+            <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>المتابعة باستخدام البريد الإلكتروني</span>
+        </button>
+
+        <p class="text-center text-xs text-slate-500 leading-6 pt-2">
+          بتسجيل الدخول، فإنك توافق على شروط الاستخدام وسياسة الخصوصية عند توفرهما.
         </p>
-        <div class="mt-10 space-y-5">
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-teal-300">✓</div>
-            <div>
-              <div class="font-bold">حسابك وخصوصيتك</div>
-              <div class="text-sm text-slate-500 mt-1">مصادقة عبر Supabase Auth</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-indigo-300">⌕</div>
-            <div>
-              <div class="font-bold">معرفة بلا حدود</div>
-              <div class="text-sm text-slate-500 mt-1">تجربة مصممة للقارئ العربي</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
 
-      <section class="glass rounded-3xl p-6 sm:p-9 w-full max-w-xl mx-auto">
-        <div class="mb-7">
-          <p class="text-indigo-300 text-sm font-bold mb-2">أهلاً بك في SuperPedia</p>
-          <h2 id="title" class="text-3xl font-extrabold">مرحباً بعودتك</h2>
-          <p id="subtitle" class="text-slate-400 mt-3 leading-7">سجّل دخولك لمتابعة رحلتك المعرفية.</p>
+      <!-- نموذج البريد الإلكتروني -->
+      <form id="email-form" class="hidden-section space-y-4" novalidate>
+        <div>
+          <label for="email" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
+          <input id="email" class="field" type="email" autocomplete="email" placeholder="name@example.com" required>
         </div>
 
-        <div id="notice" class="notice hidden-panel" role="status" aria-live="polite"></div>
-
-        <div id="sessionPanel" class="hidden-panel">
-          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-5 mb-5">
-            <div class="text-emerald-300 font-bold mb-2">أنت مسجّل الدخول بالفعل</div>
-            <div id="userEmail" class="text-sm text-slate-300 break-all"></div>
-          </div>
-          <button id="continueBtn" class="primary mb-3" type="button">متابعة إلى الموسوعة</button>
-          <button id="logoutBtn" class="w-full rounded-xl border border-white/10 py-3 text-slate-300" type="button">تسجيل الخروج</button>
+        <div id="password-wrap">
+          <label for="password" class="block text-sm font-bold mb-2">كلمة المرور</label>
+          <input id="password" class="field" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور" minlength="8">
+          <p id="password-hint" class="text-xs text-slate-500 mt-2">ثمانية أحرف على الأقل.</p>
         </div>
 
-        <div id="authPanel">
-          <div id="tabs" class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-black/20 border border-white/5 mb-6">
-            <button id="loginTab" class="tab active" type="button">تسجيل الدخول</button>
-            <button id="signupTab" class="tab" type="button">إنشاء حساب</button>
-          </div>
-
-          <form id="loginForm" novalidate>
-            <div class="mb-5">
-              <label for="loginEmail" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
-              <input id="loginEmail" class="field" type="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="name@example.com" required>
-            </div>
-            <div class="mb-3">
-              <div class="flex justify-between items-center mb-2 gap-3">
-                <label for="loginPassword" class="text-sm font-bold">كلمة المرور</label>
-                <button id="forgotBtn" class="text-xs text-indigo-300" type="button">نسيت كلمة المرور؟</button>
-              </div>
-              <div class="relative">
-                <input id="loginPassword" class="field pl-16" type="password" autocomplete="current-password" maxlength="128" placeholder="أدخل كلمة المرور" required>
-                <button class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400" type="button" data-toggle="loginPassword">إظهار</button>
-              </div>
-            </div>
-            <button id="loginBtn" class="primary mt-5" type="submit">تسجيل الدخول</button>
-          </form>
-
-          <form id="signupForm" class="hidden-panel" novalidate>
-            <div class="mb-5">
-              <label for="signupName" class="block text-sm font-bold mb-2">الاسم المعروض</label>
-              <input id="signupName" class="field" type="text" autocomplete="name" minlength="2" maxlength="80" placeholder="اكتب اسمك" required>
-            </div>
-            <div class="mb-5">
-              <label for="signupEmail" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
-              <input id="signupEmail" class="field" type="email" autocomplete="email" inputmode="email" maxlength="254" placeholder="name@example.com" required>
-            </div>
-            <div class="mb-4">
-              <label for="signupPassword" class="block text-sm font-bold mb-2">كلمة المرور</label>
-              <div class="relative">
-                <input id="signupPassword" class="field pl-16" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="8 أحرف على الأقل" required>
-                <button class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400" type="button" data-toggle="signupPassword">إظهار</button>
-              </div>
-              <div class="strength"><div id="strengthFill"></div></div>
-              <p id="strengthText" class="text-xs text-slate-500 mt-2">قوة كلمة المرور</p>
-            </div>
-            <div class="mb-5">
-              <label for="signupConfirm" class="block text-sm font-bold mb-2">تأكيد كلمة المرور</label>
-              <input id="signupConfirm" class="field" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="أعد كتابة كلمة المرور" required>
-            </div>
-            <label class="flex items-start gap-3 text-sm text-slate-400 mb-6">
-              <input id="terms" type="checkbox" class="accent-indigo-400 w-4 h-4 mt-1" required>
-              <span>أوافق على شروط الاستخدام وسياسة الخصوصية.</span>
-            </label>
-            <button id="signupBtn" class="primary" type="submit">إنشاء حساب جديد</button>
-            <p class="text-xs text-slate-500 leading-6 mt-4">قد تحتاج إلى تأكيد بريدك الإلكتروني قبل تسجيل الدخول.</p>
-          </form>
-
-          <form id="resetForm" class="hidden-panel" novalidate>
-            <div class="mb-5">
-              <label for="resetEmail" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
-              <input id="resetEmail" class="field" type="email" autocomplete="email" maxlength="254" placeholder="name@example.com" required>
-            </div>
-            <button id="resetBtn" class="primary" type="submit">إرسال رابط الاستعادة</button>
-            <button id="backBtn" class="w-full mt-4 py-3 text-slate-400" type="button">العودة إلى تسجيل الدخول</button>
-          </form>
-
-          <form id="newPasswordForm" class="hidden-panel" novalidate>
-            <div class="mb-5">
-              <label for="newPassword" class="block text-sm font-bold mb-2">كلمة المرور الجديدة</label>
-              <input id="newPassword" class="field" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
-            </div>
-            <div class="mb-5">
-              <label for="newPasswordConfirm" class="block text-sm font-bold mb-2">تأكيد كلمة المرور الجديدة</label>
-              <input id="newPasswordConfirm" class="field" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
-            </div>
-            <button id="savePasswordBtn" class="primary" type="submit">حفظ كلمة المرور الجديدة</button>
-          </form>
+        <div id="confirm-wrap" class="hidden-section">
+          <label for="confirm-password" class="block text-sm font-bold mb-2">تأكيد كلمة المرور</label>
+          <input id="confirm-password" class="field" type="password" autocomplete="new-password" placeholder="أعد كتابة كلمة المرور" minlength="8">
         </div>
 
-        <div class="border-t border-white/5 mt-7 pt-5 text-center text-xs text-slate-500">
-          تتم المصادقة عبر Supabase Auth
+        <button id="submit-email" class="primary-btn" type="submit">تسجيل الدخول</button>
+
+        <div id="email-links" class="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <button id="signup-toggle" class="text-blue-400 hover:text-blue-300" type="button">إنشاء حساب جديد</button>
+          <button id="forgot-toggle" class="text-slate-400 hover:text-white" type="button">نسيت كلمة المرور؟</button>
         </div>
-      </section>
-    </div>
+
+        <button id="back-social" class="w-full text-sm text-slate-400 hover:text-white pt-2" type="button">العودة إلى خيارات الدخول</button>
+      </form>
+
+      <!-- تعيين كلمة مرور جديدة بعد رابط الاستعادة -->
+      <form id="reset-form" class="hidden-section space-y-4" novalidate>
+        <div>
+          <label for="new-password" class="block text-sm font-bold mb-2">كلمة المرور الجديدة</label>
+          <input id="new-password" class="field" type="password" autocomplete="new-password" minlength="8" required placeholder="ثمانية أحرف على الأقل">
+        </div>
+        <div>
+          <label for="new-password-confirm" class="block text-sm font-bold mb-2">تأكيد كلمة المرور الجديدة</label>
+          <input id="new-password-confirm" class="field" type="password" autocomplete="new-password" minlength="8" required placeholder="أعد كتابة كلمة المرور">
+        </div>
+        <button class="primary-btn" type="submit" id="save-password">حفظ كلمة المرور الجديدة</button>
+      </form>
+
+      <!-- حساب مسجل بالفعل -->
+      <div id="logged-in" class="hidden-section text-center space-y-4">
+        <div class="w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center text-2xl">✓</div>
+        <p class="text-slate-300">أنت مسجل الدخول بالفعل.</p>
+        <a href="index.html" class="primary-btn block">الانتقال إلى سوبر بيديا</a>
+        <button id="logout" class="text-sm text-slate-400 hover:text-white" type="button">تسجيل الخروج</button>
+      </div>
+
+      <div class="mt-7 pt-5 border-t border-slate-700/70 text-center">
+        <p class="text-xs text-slate-500 leading-6">
+          سوبر بيديا — المعرفة أقرب إليك.
+          <br>
+          <span id="connection-status">جارٍ الاتصال بخدمة المصادقة…</span>
+        </p>
+      </div>
+    </section>
   </main>
 
-  <footer class="border-t border-white/5 px-5 py-5 text-center text-xs text-slate-600">
-    © <span id="year"></span> SuperPedia — جميع الحقوق محفوظة.
+  <footer class="text-center text-xs text-slate-600 px-4 pb-5">
+    © <span id="year"></span> SuperPedia. جميع الحقوق محفوظة.
   </footer>
 
   <script>
     'use strict';
 
-    // بيانات مشروع SuperPedia
+    // إعدادات مشروع Supabase الخاص بك
     const SUPABASE_URL = 'https://sroxejvzhheaqwciwpye.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6OSenzq9hZw6CX9j6BvlEw_WkH4Qkxr';
 
-    // غيّرها لاحقاً إذا أنشأت لوحة مستخدمين مخصصة.
-    const DEFAULT_REDIRECT = 'index.html';
+    const { createClient } = window.supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-    const $ = id => document.getElementById(id);
+    const $ = (id) => document.getElementById(id);
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    const safeNext = (() => {
+      const candidate = params.get('next');
+      if (!candidate) return 'index.html';
+      // السماح بالانتقال إلى صفحة داخلية فقط، ومنع الروابط الخارجية.
+      if (/^(https?:|\/\/|javascript:|data:)/i.test(candidate)) return 'index.html';
+      if (candidate.includes('\\')) return 'index.html';
+      return candidate;
+    })();
 
-    let client = null;
+    let emailMode = 'login';
     let busy = false;
-    let recoveryMode = false;
+    let recoverySession = false;
 
     $('year').textContent = new Date().getFullYear();
 
-    function notice(message, type = 'info') {
+    function authPageUrl(query = '') {
+      const url = new URL('auth.html', window.location.href);
+      url.search = query;
+      url.hash = '';
+      return url.href;
+    }
+
+    function destinationUrl() {
+      return new URL(safeNext, window.location.href).href;
+    }
+
+    function showNotice(message, kind = 'info') {
       const box = $('notice');
-      box.className = 'notice ' + type;
       box.textContent = message;
-      box.classList.remove('hidden-panel');
-    }
+      box.classList.remove('hidden-section');
+      box.className = 'mb-5 rounded-xl border px-4 py-3 text-sm leading-6';
 
-    function clearNotice() {
-      $('notice').textContent = '';
-      $('notice').classList.add('hidden-panel');
-    }
-
-    function setBusy(button, value, label) {
-      if (value) {
-        button.dataset.label = button.textContent;
-        button.disabled = true;
-        button.innerHTML = '<span class="spinner"></span> ' + label;
+      if (kind === 'error') {
+        box.classList.add('border-red-500/30', 'bg-red-500/10', 'text-red-200');
+      } else if (kind === 'success') {
+        box.classList.add('border-emerald-500/30', 'bg-emerald-500/10', 'text-emerald-200');
       } else {
-        button.disabled = false;
-        button.textContent = button.dataset.label || label;
+        box.classList.add('border-blue-500/30', 'bg-blue-500/10', 'text-blue-200');
       }
     }
 
-    function validEmail(email) {
-      return email.length <= 254 &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    function hideNotice() {
+      $('notice').classList.add('hidden-section');
     }
 
-    function validPassword(password) {
-      return typeof password === 'string' &&
-        password.length >= 8 && password.length <= 128;
-    }
-
-    function safeRedirect() {
-      const requested = new URLSearchParams(location.search).get('next');
-      if (!requested) return DEFAULT_REDIRECT;
-
-      try {
-        const target = new URL(requested, location.href);
-        if (target.origin !== location.origin) return DEFAULT_REDIRECT;
-        if (target.pathname.endsWith('/auth.html')) return DEFAULT_REDIRECT;
-        return target.pathname + target.search + target.hash;
-      } catch {
-        return DEFAULT_REDIRECT;
+    function setBusy(value, buttonId = 'submit-email', busyText = 'يرجى الانتظار…') {
+      busy = value;
+      const button = $(buttonId);
+      if (!button) return;
+      if (value) {
+        button.dataset.originalText = button.textContent;
+        button.textContent = busyText;
+      } else if (button.dataset.originalText) {
+        button.textContent = button.dataset.originalText;
+        delete button.dataset.originalText;
       }
+      button.disabled = value;
     }
 
-    function goNext() {
-      location.replace(safeRedirect());
+    function showSocial() {
+      $('social-section').classList.remove('hidden-section');
+      $('email-form').classList.add('hidden-section');
+      $('reset-form').classList.add('hidden-section');
+      $('logged-in').classList.add('hidden-section');
+      $('page-title').textContent = 'مرحبًا بك في سوبر بيديا';
+      $('page-subtitle').textContent = 'اختر الطريقة المناسبة للدخول إلى حسابك ومتابعة رحلتك المعرفية.';
+      hideNotice();
     }
 
-    function showSession(user) {
-      $('authPanel').classList.add('hidden-panel');
-      $('sessionPanel').classList.remove('hidden-panel');
-      $('userEmail').textContent = user.email || 'تم تسجيل الدخول';
-      $('title').textContent = 'مرحباً بك';
-      $('subtitle').textContent = 'جلستك نشطة ويمكنك المتابعة.';
+    function showEmailForm(nextMode = 'login') {
+      emailMode = nextMode;
+      $('social-section').classList.add('hidden-section');
+      $('email-form').classList.remove('hidden-section');
+      $('reset-form').classList.add('hidden-section');
+      $('logged-in').classList.add('hidden-section');
+      $('confirm-wrap').classList.toggle('hidden-section', nextMode !== 'signup');
+      $('password-wrap').classList.toggle('hidden-section', nextMode === 'forgot');
+      $('email-links').classList.toggle('hidden-section', nextMode === 'forgot');
+      $('page-title').textContent =
+        nextMode === 'signup' ? 'إنشاء حساب جديد' :
+        nextMode === 'forgot' ? 'استعادة كلمة المرور' :
+        'الدخول بالبريد الإلكتروني';
+
+      $('page-subtitle').textContent =
+        nextMode === 'signup' ? 'أنشئ حسابك وابدأ رحلتك في عالم المعرفة.' :
+        nextMode === 'forgot' ? 'سنرسل لك رابطًا لإعادة تعيين كلمة المرور.' :
+        'أدخل بياناتك للمتابعة إلى حسابك.';
+
+      $('submit-email').textContent =
+        nextMode === 'signup' ? 'إنشاء الحساب' :
+        nextMode === 'forgot' ? 'إرسال رابط الاستعادة' :
+        'تسجيل الدخول';
+
+      $('password').required = nextMode !== 'forgot';
+      $('confirm-password').required = nextMode === 'signup';
+      $('password').autocomplete = nextMode === 'signup' ? 'new-password' : 'current-password';
+      $('password-hint').classList.toggle('hidden-section', nextMode === 'forgot');
+      hideNotice();
     }
 
-    function showForms() {
-      $('sessionPanel').classList.add('hidden-panel');
-      $('authPanel').classList.remove('hidden-panel');
+    function showResetForm() {
+      $('social-section').classList.add('hidden-section');
+      $('email-form').classList.add('hidden-section');
+      $('reset-form').classList.remove('hidden-section');
+      $('logged-in').classList.add('hidden-section');
+      $('page-title').textContent = 'تعيين كلمة مرور جديدة';
+      $('page-subtitle').textContent = 'اختر كلمة مرور جديدة لحماية حسابك.';
+      recoverySession = true;
     }
 
-    function setMode(mode) {
-      clearNotice();
-
-      $('loginForm').classList.toggle('hidden-panel', mode !== 'login');
-      $('signupForm').classList.toggle('hidden-panel', mode !== 'signup');
-      $('resetForm').classList.toggle('hidden-panel', mode !== 'reset');
-      $('newPasswordForm').classList.add('hidden-panel');
-      $('tabs').classList.toggle('hidden-panel', mode === 'reset');
-
-      $('loginTab').classList.toggle('active', mode === 'login');
-      $('signupTab').classList.toggle('active', mode === 'signup');
-
-      $('title').textContent =
-        mode === 'signup' ? 'أنشئ حسابك الجديد' :
-        mode === 'reset' ? 'استعادة كلمة المرور' :
-        'مرحباً بعودتك';
-
-      $('subtitle').textContent =
-        mode === 'signup' ? 'أنشئ حساباً لتبدأ رحلتك المعرفية.' :
-        mode === 'reset' ? 'أدخل بريدك الإلكتروني لاستعادة حسابك.' :
-        'سجّل دخولك لمتابعة رحلتك المعرفية.';
-
-      if (mode === 'reset') {
-        $('resetEmail').value = $('loginEmail').value.trim();
-      }
+    function showLoggedIn() {
+      $('social-section').classList.add('hidden-section');
+      $('email-form').classList.add('hidden-section');
+      $('reset-form').classList.add('hidden-section');
+      $('logged-in').classList.remove('hidden-section');
+      $('page-title').textContent = 'أهلًا بعودتك';
+      $('page-subtitle').textContent = 'تم التعرف على جلسة حسابك.';
+      $('connection-status').textContent = 'متصل بخدمة المصادقة.';
+      hideNotice();
     }
 
-    function showRecoveryForm() {
-      recoveryMode = true;
-      clearNotice();
-      showForms();
-      $('tabs').classList.add('hidden-panel');
-      $('loginForm').classList.add('hidden-panel');
-      $('signupForm').classList.add('hidden-panel');
-      $('resetForm').classList.add('hidden-panel');
-      $('newPasswordForm').classList.remove('hidden-panel');
-      $('title').textContent = 'تعيين كلمة مرور جديدة';
-      $('subtitle').textContent = 'اختر كلمة مرور جديدة وآمنة لحسابك.';
-    }
-
-    function translateError(error) {
+    function friendlyError(error) {
       const message = String(error?.message || '').toLowerCase();
 
       if (message.includes('invalid login credentials')) {
-        return 'بيانات الدخول غير صحيحة. تحقق من البريد وكلمة المرور.';
+        return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
       }
       if (message.includes('email not confirmed')) {
-        return 'يرجى تأكيد بريدك الإلكتروني من رسالة التأكيد أولاً.';
+        return 'يرجى تأكيد بريدك الإلكتروني من الرسالة التي وصلتك.';
       }
       if (message.includes('user already registered')) {
-        return 'تعذر إنشاء الحساب بهذه البيانات. جرّب تسجيل الدخول.';
+        return 'هذا البريد مسجل بالفعل. حاول تسجيل الدخول بدلًا من إنشاء حساب.';
+      }
+      if (message.includes('password should be at least')) {
+        return 'كلمة المرور قصيرة جدًا. استخدم 8 أحرف على الأقل.';
       }
       if (message.includes('rate limit') || message.includes('too many requests')) {
-        return 'طلبات كثيرة خلال وقت قصير. انتظر قليلاً ثم أعد المحاولة.';
+        return 'أُرسلت طلبات كثيرة خلال وقت قصير. انتظر قليلًا ثم حاول مجددًا.';
       }
-      if (message.includes('fetch') || message.includes('network')) {
-        return 'تعذر الاتصال. تحقق من الإنترنت وحاول مجدداً.';
+      if (message.includes('provider is not enabled')) {
+        return 'طريقة الدخول هذه غير مفعّلة في Supabase حتى الآن. أكمل إعداد المزوّد أولًا.';
       }
-      if (message.includes('password')) {
-        return 'كلمة المرور لا تحقق متطلبات المشروع.';
+      if (message.includes('redirect') && message.includes('not allowed')) {
+        return 'عنوان العودة غير مسموح به. أضف عنوان الموقع إلى قائمة Redirect URLs في Supabase.';
       }
-      return 'تعذر إكمال العملية. تحقق من إعدادات Supabase وحاول مجدداً.';
+      return error?.message || 'حدث خطأ غير متوقع. حاول مجددًا.';
     }
 
-    async function init() {
-      if (!window.supabase?.createClient) {
-        notice('تعذر تحميل مكتبة Supabase. تحقق من اتصال الإنترنت.', 'error');
-        return;
-      }
+    async function signInSocial(provider, buttonId) {
+      if (busy) return;
+      hideNotice();
 
-      client = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY,
-        {
-          auth: {
-            persistSession: true,
-            autoRefreshToken: true,
-            detectSessionInUrl: true
-          }
-        }
-      );
-
-      const hash = new URLSearchParams(location.hash.slice(1));
-      const params = new URLSearchParams(location.search);
-
-      if (hash.get('error')) {
-        notice('تعذر التحقق من رابط البريد. قد يكون الرابط منتهي الصلاحية أو مستخدماً سابقاً.', 'error');
-      }
-
-      if (hash.get('type') === 'recovery' || params.get('mode') === 'recovery') {
-        showRecoveryForm();
-      }
-
-      const { data, error } = await client.auth.getSession();
-
-      if (error) {
-        notice('تعذر التحقق من الجلسة. حاول إعادة تحميل الصفحة.', 'error');
-      } else if (data.session && !recoveryMode) {
-        showSession(data.session.user);
-      }
-
-      client.auth.onAuthStateChange((event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          showRecoveryForm();
-        } else if (event === 'SIGNED_OUT') {
-          recoveryMode = false;
-          showForms();
-          setMode('login');
-        } else if (event === 'SIGNED_IN' && session && !recoveryMode) {
-          showSession(session.user);
-        }
-      });
-    }
-
-    $('loginTab').addEventListener('click', () => setMode('login'));
-    $('signupTab').addEventListener('click', () => setMode('signup'));
-    $('forgotBtn').addEventListener('click', () => setMode('reset'));
-    $('backBtn').addEventListener('click', () => setMode('login'));
-
-    document.querySelectorAll('[data-toggle]').forEach(button => {
-      button.addEventListener('click', () => {
-        const input = $(button.dataset.toggle);
-        const reveal = input.type === 'password';
-        input.type = reveal ? 'text' : 'password';
-        button.textContent = reveal ? 'إخفاء' : 'إظهار';
-      });
-    });
-
-    $('loginForm').addEventListener('submit', async event => {
-      event.preventDefault();
-      if (!client || busy) return;
-      clearNotice();
-
-      const email = $('loginEmail').value.trim();
-      const password = $('loginPassword').value;
-
-      if (!validEmail(email)) {
-        notice('أدخل بريداً إلكترونياً صحيحاً.', 'error');
-        $('loginEmail').focus();
-        return;
-      }
-      if (!password || password.length > 128) {
-        notice('أدخل كلمة المرور بصورة صحيحة.', 'error');
-        $('loginPassword').focus();
-        return;
-      }
-
-      busy = true;
-      setBusy($('loginBtn'), true, 'جارٍ تسجيل الدخول...');
+      const button = $(buttonId);
+      button.disabled = true;
+      button.dataset.originalText = button.textContent;
+      button.textContent = 'جارٍ تحويلك…';
 
       try {
-        const { data, error } = await client.auth.signInWithPassword({
-          email,
-          password
+        const { error } = await db.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: authPageUrl('?mode=oauth'),
+            skipBrowserRedirect: false
+          }
         });
+
         if (error) throw error;
-        if (!data.session) {
-          notice('لم يتم إنشاء جلسة. تحقق من تأكيد بريدك الإلكتروني.', 'info');
+      } catch (error) {
+        showNotice(friendlyError(error), 'error');
+        button.disabled = false;
+        button.textContent = button.dataset.originalText || 'حاول مرة أخرى';
+        delete button.dataset.originalText;
+      }
+    }
+
+    $('google-login').addEventListener('click', () => {
+      signInSocial('google', 'google-login');
+    });
+
+    $('apple-login').addEventListener('click', () => {
+      signInSocial('apple', 'apple-login');
+    });
+
+    $('email-choice').addEventListener('click', () => showEmailForm('login'));
+    $('back-social').addEventListener('click', showSocial);
+    $('signup-toggle').addEventListener('click', () => showEmailForm('signup'));
+    $('forgot-toggle').addEventListener('click', () => showEmailForm('forgot'));
+
+    $('email-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (busy) return;
+      hideNotice();
+
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      const confirmPassword = $('confirm-password').value;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showNotice('أدخل بريدًا إلكترونيًا صحيحًا.', 'error');
+        return;
+      }
+
+      if (emailMode !== 'forgot' && password.length < 8) {
+        showNotice('يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.', 'error');
+        return;
+      }
+
+      if (emailMode === 'signup' && password !== confirmPassword) {
+        showNotice('كلمتا المرور غير متطابقتين.', 'error');
+        return;
+      }
+
+      setBusy(true, 'submit-email');
+
+      try {
+        if (emailMode === 'login') {
+          const { error } = await db.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+
+          showNotice('تم تسجيل الدخول بنجاح. جارٍ فتح الموقع…', 'success');
+          window.location.replace(destinationUrl());
           return;
         }
-        goNext();
-      } catch (error) {
-        notice(translateError(error), 'error');
-      } finally {
-        busy = false;
-        setBusy($('loginBtn'), false, 'تسجيل الدخول');
-      }
-    });
 
-    $('signupForm').addEventListener('submit', async event => {
-      event.preventDefault();
-      if (!client || busy) return;
-      clearNotice();
+        if (emailMode === 'signup') {
+          const { data, error } = await db.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: authPageUrl('?mode=verify')
+            }
+          });
 
-      const name = $('signupName').value.trim();
-      const email = $('signupEmail').value.trim();
-      const password = $('signupPassword').value;
-      const confirmation = $('signupConfirm').value;
+          if (error) throw error;
 
-      if (name.length < 2 || name.length > 80) {
-        notice('يجب أن يتراوح الاسم بين حرفين و80 حرفاً.', 'error');
-        $('signupName').focus();
-        return;
-      }
-      if (!validEmail(email)) {
-        notice('أدخل بريداً إلكترونياً صحيحاً.', 'error');
-        $('signupEmail').focus();
-        return;
-      }
-      if (!validPassword(password)) {
-        notice('يجب أن تتراوح كلمة المرور بين 8 و128 محرفاً.', 'error');
-        $('signupPassword').focus();
-        return;
-      }
-      if (password !== confirmation) {
-        notice('كلمتا المرور غير متطابقتين.', 'error');
-        $('signupConfirm').focus();
-        return;
-      }
-      if (!$('terms').checked) {
-        notice('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية.', 'error');
-        $('terms').focus();
-        return;
-      }
-
-      busy = true;
-      setBusy($('signupBtn'), true, 'جارٍ إنشاء الحساب...');
-
-      try {
-        const emailRedirectTo = new URL('auth.html', location.href).href;
-
-        const { data, error } = await client.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { display_name: name },
-            emailRedirectTo
+          if (data.session) {
+            showNotice('تم إنشاء الحساب بنجاح.', 'success');
+            window.location.replace(destinationUrl());
+            return;
           }
-        });
 
-        if (error) throw error;
+          showNotice('تم إرسال رسالة إلى بريدك الإلكتروني. افتحها لتأكيد الحساب ثم ارجع إلى الموقع.', 'success');
+          $('email-form').reset();
+          return;
+        }
 
-        if (data.session) {
-          notice('تم إنشاء الحساب بنجاح.', 'success');
-          goNext();
-        } else {
-          $('signupForm').reset();
-          updateStrength('');
-          notice(
-            'تم إرسال طلب التسجيل. افتح رسالة تأكيد البريد الإلكتروني قبل تسجيل الدخول إذا كان التأكيد مفعّلاً.',
-            'success'
-          );
+        if (emailMode === 'forgot') {
+          const { error } = await db.auth.resetPasswordForEmail(email, {
+            redirectTo: authPageUrl('?mode=reset')
+          });
+
+          if (error) throw error;
+
+          showNotice('إذا كان البريد مسجلًا، فستصلك رسالة تتضمن رابط استعادة كلمة المرور. افحص صندوق الوارد والبريد غير المرغوب فيه.', 'success');
+          return;
         }
       } catch (error) {
-        notice(translateError(error), 'error');
+        showNotice(friendlyError(error), 'error');
       } finally {
-        busy = false;
-        setBusy($('signupBtn'), false, 'إنشاء حساب جديد');
+        setBusy(false, 'submit-email');
       }
     });
 
-    $('resetForm').addEventListener('submit', async event => {
+    $('reset-form').addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!client || busy) return;
-      clearNotice();
+      if (busy) return;
+      hideNotice();
 
-      const email = $('resetEmail').value.trim();
-      if (!validEmail(email)) {
-        notice('أدخل بريداً إلكترونياً صحيحاً.', 'error');
-        $('resetEmail').focus();
+      const password = $('new-password').value;
+      const confirmPassword = $('new-password-confirm').value;
+
+      if (password.length < 8) {
+        showNotice('استخدم كلمة مرور لا تقل عن 8 أحرف.', 'error');
         return;
       }
 
-      busy = true;
-      setBusy($('resetBtn'), true, 'جارٍ إرسال الرابط...');
+      if (password !== confirmPassword) {
+        showNotice('كلمتا المرور غير متطابقتين.', 'error');
+        return;
+      }
+
+      setBusy(true, 'save-password', 'جارٍ الحفظ…');
 
       try {
-        const redirectTo = new URL(
-          'auth.html?mode=recovery',
-          location.href
-        ).href;
-
-        const { error } = await client.auth.resetPasswordForEmail(email, {
-          redirectTo
-        });
+        const { error } = await db.auth.updateUser({ password });
         if (error) throw error;
 
-        notice(
-          'إذا كان البريد مرتبطاً بحساب، فستصلك رسالة الاستعادة. تحقق أيضاً من البريد غير المرغوب فيه.',
-          'success'
-        );
+        showNotice('تم تحديث كلمة المرور بنجاح. يمكنك الآن الدخول إلى حسابك.', 'success');
+        await db.auth.signOut();
+        recoverySession = false;
+        window.history.replaceState({}, document.title, authPageUrl());
+        showEmailForm('login');
       } catch (error) {
-        notice(translateError(error), 'error');
+        showNotice(friendlyError(error), 'error');
       } finally {
-        busy = false;
-        setBusy($('resetBtn'), false, 'إرسال رابط الاستعادة');
+        setBusy(false, 'save-password');
       }
     });
 
-    $('newPasswordForm').addEventListener('submit', async event => {
-      event.preventDefault();
-      if (!client || busy) return;
-      clearNotice();
-
-      const password = $('newPassword').value;
-      const confirmation = $('newPasswordConfirm').value;
-
-      if (!validPassword(password)) {
-        notice('يجب أن تتراوح كلمة المرور بين 8 و128 محرفاً.', 'error');
-        return;
-      }
-      if (password !== confirmation) {
-        notice('كلمتا المرور غير متطابقتين.', 'error');
-        return;
-      }
-
-      busy = true;
-      setBusy($('savePasswordBtn'), true, 'جارٍ الحفظ...');
-
+    $('logout').addEventListener('click', async () => {
+      const button = $('logout');
+      button.disabled = true;
       try {
-        const { error } = await client.auth.updateUser({ password });
+        const { error } = await db.auth.signOut();
         if (error) throw error;
-
-        recoveryMode = false;
-        history.replaceState({}, document.title, location.pathname);
-        $('newPasswordForm').reset();
-        setMode('login');
-        notice('تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.', 'success');
+        window.location.replace(authPageUrl());
       } catch (error) {
-        notice(translateError(error), 'error');
-      } finally {
-        busy = false;
-        setBusy($('savePasswordBtn'), false, 'حفظ كلمة المرور الجديدة');
+        showNotice(friendlyError(error), 'error');
+        button.disabled = false;
       }
     });
 
-    function updateStrength(password) {
-      let score = 0;
-      if (password.length >= 8) score++;
-      if (password.length >= 12) score++;
-      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-      if (/\d/.test(password)) score++;
-      if (/[^a-zA-Z0-9]/.test(password)) score++;
+    async function initializeAuth() {
+      try {
+        const { data, error } = await db.auth.getSession();
+        if (error) throw error;
 
-      const levels = [
-        ['0%', '#263247', 'قوة كلمة المرور'],
-        ['20%', '#f87171', 'ضعيفة جداً'],
-        ['40%', '#fb923c', 'ضعيفة'],
-        ['60%', '#facc15', 'متوسطة'],
-        ['80%', '#4ade80', 'جيدة'],
-        ['100%', '#2dd4bf', 'قوية']
-      ];
+        const session = data.session;
+        $('connection-status').textContent = 'متصل بخدمة المصادقة.';
 
-      const level = password.length ? Math.max(1, score) : 0;
-      $('strengthFill').style.width = levels[level][0];
-      $('strengthFill').style.background = levels[level][1];
-      $('strengthText').textContent = levels[level][2];
+        if (mode === 'reset') {
+          if (!session) {
+            showNotice('افتح رابط استعادة كلمة المرور الذي وصلك عبر البريد الإلكتروني. إذا انتهت صلاحيته، اطلب رابطًا جديدًا.', 'error');
+            showEmailForm('forgot');
+          } else {
+            showResetForm();
+          }
+          return;
+        }
+
+        if (session) {
+          if (mode === 'oauth' || mode === 'verify') {
+            showNotice('تم التحقق من حسابك بنجاح. جارٍ فتح الموقع…', 'success');
+            window.location.replace(destinationUrl());
+            return;
+          }
+
+          showLoggedIn();
+          return;
+        }
+
+        if (mode === 'oauth') {
+          showNotice('لم تكتمل عملية تسجيل الدخول. حاول مجددًا.', 'error');
+        } else if (mode === 'verify') {
+          showNotice('إذا أكدت بريدك الإلكتروني، جرّب تسجيل الدخول الآن.', 'info');
+        }
+
+        showSocial();
+      } catch (error) {
+        $('connection-status').textContent = 'تعذر التحقق من الاتصال.';
+        showNotice('تعذر الاتصال بخدمة المصادقة. تحقق من الإنترنت وإعدادات Supabase ثم أعد المحاولة.', 'error');
+        console.error('Supabase auth initialization error:', error);
+      }
     }
 
-    $('signupPassword').addEventListener('input', event => {
-      updateStrength(event.target.value);
-    });
-
-    $('continueBtn').addEventListener('click', () => goNext());
-
-    $('logoutBtn').addEventListener('click', async () => {
-      if (!client || busy) return;
-      busy = true;
-      setBusy($('logoutBtn'), true, 'جارٍ تسجيل الخروج...');
-
-      try {
-        const { error } = await client.auth.signOut();
-        if (error) throw error;
-        showForms();
-        setMode('login');
-        notice('تم تسجيل الخروج بنجاح.', 'success');
-      } catch (error) {
-        notice(translateError(error), 'error');
-      } finally {
-        busy = false;
-        setBusy($('logoutBtn'), false, 'تسجيل الخروج');
+    // الاستماع إلى جلسات الدخول وتحديث كلمة المرور.
+    db.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        recoverySession = true;
+        showResetForm();
       }
     });
 
-    init().catch(error => {
-      console.error('Supabase initialization error:', error);
-      notice('تعذرت تهيئة المصادقة. تحقق من إعدادات المشروع واتصال الإنترنت.', 'error');
-    });
+    initializeAuth();
   </script>
 </body>
 </html>
