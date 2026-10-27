@@ -1,0 +1,1154 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="سوبر بيديا — بوابتك إلى المعرفة العربية الموثوقة.">
+  <title>تسجيل الدخول | SuperPedia</title>
+
+  <!-- خط الواجهة العربية -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            tajawal: ['Tajawal', 'sans-serif']
+          },
+          colors: {
+            midnight: '#080d18',
+            panel: '#101827',
+            accent: '#8b9cff',
+            mint: '#5eead4'
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Supabase JavaScript Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html {
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: #080d18;
+      color: #f1f5f9;
+      min-height: 100vh;
+    }
+
+    .background-glow {
+      background:
+        radial-gradient(ellipse at 15% 10%, rgba(99,102,241,.14), transparent 38%),
+        radial-gradient(ellipse at 85% 85%, rgba(45,212,191,.08), transparent 35%),
+        #080d18;
+    }
+
+    .glass {
+      background: rgba(16, 24, 39, .88);
+      border: 1px solid rgba(148, 163, 184, .14);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .25);
+      backdrop-filter: blur(18px);
+    }
+
+    .field {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid #293449;
+      border-radius: 12px;
+      background: #0b1220;
+      padding: 12px 14px;
+      color: #f8fafc;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .field::placeholder { color: #64748b; }
+
+    .field:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px rgba(129, 140, 248, .12);
+    }
+
+    .primary-btn {
+      min-height: 48px;
+      background: linear-gradient(110deg, #818cf8, #6366f1);
+      color: white;
+      border-radius: 12px;
+      font-weight: 700;
+      transition: transform .2s, opacity .2s;
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .primary-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .tab-btn {
+      padding: 10px 8px;
+      border-radius: 10px;
+      color: #94a3b8;
+      font-weight: 700;
+      transition: background .2s, color .2s;
+    }
+
+    .tab-btn.active {
+      background: #222c43;
+      color: #fff;
+    }
+
+    .notice {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .notice.error {
+      background: rgba(127, 29, 29, .2);
+      border: 1px solid rgba(248, 113, 113, .3);
+      color: #fca5a5;
+    }
+
+    .notice.success {
+      background: rgba(6, 78, 59, .22);
+      border: 1px solid rgba(52, 211, 153, .3);
+      color: #6ee7b7;
+    }
+
+    .notice.info {
+      background: rgba(30, 58, 138, .2);
+      border: 1px solid rgba(129, 140, 248, .3);
+      color: #c7d2fe;
+    }
+
+    .strength-bar {
+      height: 4px;
+      border-radius: 999px;
+      background: #263247;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0;
+      transition: width .2s, background .2s;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 17px;
+      height: 17px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden-panel { display: none !important; }
+
+    :focus-visible {
+      outline: 2px solid #a5b4fc;
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-tajawal background-glow">
+
+  <!-- شريط التنقل -->
+  <header class="border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
+      <a href="index.html" class="flex items-center gap-3" aria-label="العودة إلى الصفحة الرئيسية">
+        <div class="w-11 h-11 rounded-2xl bg-indigo-500/15 border border-indigo-400/20 flex items-center justify-center">
+          <svg viewBox="0 0 40 40" width="29" height="29" fill="none" aria-hidden="true">
+            <path d="M7 11L20 4L33 11V29L20 36L7 29V11Z" stroke="#A5B4FC" stroke-width="2"/>
+            <path d="M13 25V15L20 22L27 15V25" stroke="#5EEAD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="font-extrabold text-xl tracking-wide">SuperPedia</div>
+          <div class="text-xs text-slate-400">الموسوعة المعرفية العربية</div>
+        </div>
+      </a>
+
+      <a href="index.html" class="text-sm text-slate-400 hover:text-white transition">
+        العودة للرئيسية ←
+      </a>
+    </div>
+  </header>
+
+  <main class="min-h-[calc(100vh-145px)] flex items-center justify-center px-4 py-10">
+    <div class="w-full max-w-5xl grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
+      <!-- الجانب التعريفي -->
+      <section class="hidden lg:block">
+        <div class="inline-flex items-center gap-2 rounded-full px-4 py-2 border border-indigo-400/20 bg-indigo-400/10 text-indigo-200 text-sm mb-7">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          بوابتك إلى المعرفة
+        </div>
+
+        <h1 class="text-5xl xl:text-6xl font-extrabold leading-tight mb-6">
+          المعرفة تبدأ
+          <span class="block text-transparent bg-clip-text bg-gradient-to-l from-teal-300 to-indigo-400">
+            بخطوة واحدة.
+          </span>
+        </h1>
+
+        <p class="text-slate-400 text-lg leading-9 max-w-md">
+          ادخل إلى عالم سوبر بيديا، واكتشف تجربة معرفية عربية تجمع المعلومات
+          والعلوم والتقنية في مساحة واحدة.
+        </p>
+
+        <div class="mt-10 space-y-5">
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-teal-300">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 3L20 6V11C20 16 16.5 19.5 12 21C7.5 19.5 4 16 4 11V6L12 3Z"/>
+                <path d="M8.5 12L11 14.5L16 9.5"/>
+              </svg>
+            </div>
+            <div>
+              <div class="font-bold">حسابك، خصوصيتك</div>
+              <div class="text-sm text-slate-500 mt-1">مصادقة آمنة عبر Supabase Auth</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-indigo-300">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="M20 20L16 16"/>
+                <path d="M8 11H14M11 8V14"/>
+              </svg>
+            </div>
+            <div>
+              <div class="font-bold">رحلة معرفية متجددة</div>
+              <div class="text-sm text-slate-500 mt-1">واجهة مهيأة للتوسع مع الموسوعة</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-12 text-xs text-slate-600">
+          SUPERPEDIA · KNOWLEDGE WITHOUT BORDERS
+        </div>
+      </section>
+
+      <!-- بطاقة المصادقة -->
+      <section class="glass rounded-3xl p-6 sm:p-9 w-full max-w-xl mx-auto">
+        <div class="mb-7">
+          <div class="lg:hidden w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-400/20 flex items-center justify-center text-indigo-200 mb-5">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="4" y="10" width="16" height="11" rx="2"/>
+              <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            </svg>
+          </div>
+
+          <p class="text-indigo-300 text-sm font-bold mb-2">أهلاً بك في SuperPedia</p>
+          <h2 id="pageTitle" class="text-3xl font-extrabold">مرحباً بعودتك</h2>
+          <p id="pageSubtitle" class="text-slate-400 mt-3 leading-7">
+            سجّل دخولك لمتابعة رحلتك المعرفية.
+          </p>
+        </div>
+
+        <!-- حالة الاتصال -->
+        <div id="configWarning" class="notice error hidden-panel mb-5" role="alert">
+          لم يتم إعداد اتصال Supabase بعد. أضف رابط مشروعك والمفتاح العام في إعدادات الملف.
+        </div>
+
+        <!-- التنبيهات -->
+        <div id="notice" class="notice hidden-panel mb-5" role="status" aria-live="polite"></div>
+
+        <!-- واجهة الجلسة القائمة -->
+        <div id="sessionPanel" class="hidden-panel">
+          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-5 mb-5">
+            <div class="text-emerald-300 font-bold mb-2">أنت مسجّل الدخول بالفعل</div>
+            <div id="sessionEmail" class="text-sm text-slate-300 break-all"></div>
+          </div>
+          <button id="continueButton" type="button" class="primary-btn w-full mb-3">
+            متابعة إلى الموسوعة
+          </button>
+          <button id="logoutButton" type="button" class="w-full rounded-xl border border-white/10 py-3 text-slate-300 hover:bg-white/5">
+            تسجيل الخروج
+          </button>
+        </div>
+
+        <!-- واجهة النماذج -->
+        <div id="authPanel">
+
+          <!-- التبويبات -->
+          <div id="tabs" class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-black/20 border border-white/5 mb-6">
+            <button type="button" id="loginTab" class="tab-btn active" data-mode="login">
+              تسجيل الدخول
+            </button>
+            <button type="button" id="signupTab" class="tab-btn" data-mode="signup">
+              إنشاء حساب
+            </button>
+          </div>
+
+          <!-- نموذج الدخول -->
+          <form id="loginForm" novalidate>
+            <div class="mb-5">
+              <label for="loginEmail" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
+              <input
+                id="loginEmail"
+                name="email"
+                type="email"
+                class="field"
+                placeholder="name@example.com"
+                autocomplete="email"
+                inputmode="email"
+                maxlength="254"
+                required
+              >
+            </div>
+
+            <div class="mb-3">
+              <div class="flex items-center justify-between gap-3 mb-2">
+                <label for="loginPassword" class="text-sm font-bold">كلمة المرور</label>
+                <button type="button" id="forgotButton" class="text-xs text-indigo-300 hover:text-indigo-200">
+                  نسيت كلمة المرور؟
+                </button>
+              </div>
+
+              <div class="relative">
+                <input
+                  id="loginPassword"
+                  name="password"
+                  type="password"
+                  class="field pl-16"
+                  placeholder="أدخل كلمة المرور"
+                  autocomplete="current-password"
+                  maxlength="128"
+                  required
+                >
+                <button type="button" class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white" data-toggle="loginPassword" aria-label="إظهار أو إخفاء كلمة المرور">
+                  إظهار
+                </button>
+              </div>
+            </div>
+
+            <label class="flex items-center gap-2 text-sm text-slate-400 mt-4 mb-6 cursor-pointer">
+              <input id="rememberMe" type="checkbox" checked class="accent-indigo-400 w-4 h-4">
+              الاحتفاظ بتسجيل الدخول على هذا الجهاز
+            </label>
+
+            <button id="loginButton" type="submit" class="primary-btn w-full">
+              تسجيل الدخول
+            </button>
+          </form>
+
+          <!-- نموذج إنشاء الحساب -->
+          <form id="signupForm" class="hidden-panel" novalidate>
+            <div class="mb-5">
+              <label for="signupName" class="block text-sm font-bold mb-2">الاسم المعروض</label>
+              <input
+                id="signupName"
+                name="name"
+                type="text"
+                class="field"
+                placeholder="اكتب اسمك"
+                autocomplete="name"
+                minlength="2"
+                maxlength="80"
+                required
+              >
+              <p class="text-xs text-slate-500 mt-2">سيظهر هذا الاسم في ملفك الشخصي.</p>
+            </div>
+
+            <div class="mb-5">
+              <label for="signupEmail" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
+              <input
+                id="signupEmail"
+                name="email"
+                type="email"
+                class="field"
+                placeholder="name@example.com"
+                autocomplete="email"
+                inputmode="email"
+                maxlength="254"
+                required
+              >
+            </div>
+
+            <div class="mb-4">
+              <label for="signupPassword" class="block text-sm font-bold mb-2">كلمة المرور</label>
+              <div class="relative">
+                <input
+                  id="signupPassword"
+                  name="password"
+                  type="password"
+                  class="field pl-16"
+                  placeholder="8 أحرف على الأقل"
+                  autocomplete="new-password"
+                  minlength="8"
+                  maxlength="128"
+                  required
+                >
+                <button type="button" class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-white" data-toggle="signupPassword" aria-label="إظهار أو إخفاء كلمة المرور">
+                  إظهار
+                </button>
+              </div>
+
+              <div class="strength-bar mt-3">
+                <div id="strengthFill" class="strength-fill"></div>
+              </div>
+              <p id="strengthText" class="text-xs text-slate-500 mt-2">قوة كلمة المرور</p>
+            </div>
+
+            <div class="mb-5">
+              <label for="confirmPassword" class="block text-sm font-bold mb-2">تأكيد كلمة المرور</label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                class="field"
+                placeholder="أعد كتابة كلمة المرور"
+                autocomplete="new-password"
+                minlength="8"
+                maxlength="128"
+                required
+              >
+            </div>
+
+            <label class="flex items-start gap-3 text-sm text-slate-400 mb-6 cursor-pointer">
+              <input id="acceptTerms" type="checkbox" class="accent-indigo-400 w-4 h-4 mt-1" required>
+              <span>أوافق على شروط الاستخدام وسياسة الخصوصية الخاصة بالموسوعة.</span>
+            </label>
+
+            <button id="signupButton" type="submit" class="primary-btn w-full">
+              إنشاء حساب جديد
+            </button>
+
+            <p class="text-xs text-slate-500 leading-6 mt-4">
+              قد يُطلب منك تأكيد بريدك الإلكتروني قبل أن تتمكن من تسجيل الدخول.
+            </p>
+          </form>
+
+          <!-- نموذج استعادة كلمة المرور -->
+          <form id="resetForm" class="hidden-panel" novalidate>
+            <div class="mb-5">
+              <label for="resetEmail" class="block text-sm font-bold mb-2">البريد الإلكتروني</label>
+              <input
+                id="resetEmail"
+                name="email"
+                type="email"
+                class="field"
+                placeholder="name@example.com"
+                autocomplete="email"
+                inputmode="email"
+                maxlength="254"
+                required
+              >
+            </div>
+
+            <button id="resetButton" type="submit" class="primary-btn w-full">
+              إرسال رابط الاستعادة
+            </button>
+
+            <button type="button" id="backToLogin" class="w-full mt-4 py-3 text-slate-400 hover:text-white text-sm">
+              العودة إلى تسجيل الدخول
+            </button>
+          </form>
+
+          <!-- نموذج تعيين كلمة مرور جديدة -->
+          <form id="newPasswordForm" class="hidden-panel" novalidate>
+            <div class="mb-5">
+              <label for="newPassword" class="block text-sm font-bold mb-2">كلمة المرور الجديدة</label>
+              <input
+                id="newPassword"
+                type="password"
+                class="field"
+                placeholder="8 أحرف على الأقل"
+                autocomplete="new-password"
+                minlength="8"
+                maxlength="128"
+                required
+              >
+            </div>
+
+            <div class="mb-5">
+              <label for="newPasswordConfirm" class="block text-sm font-bold mb-2">تأكيد كلمة المرور الجديدة</label>
+              <input
+                id="newPasswordConfirm"
+                type="password"
+                class="field"
+                placeholder="أعد كتابة كلمة المرور"
+                autocomplete="new-password"
+                minlength="8"
+                maxlength="128"
+                required
+              >
+            </div>
+
+            <button id="newPasswordButton" type="submit" class="primary-btn w-full">
+              حفظ كلمة المرور الجديدة
+            </button>
+          </form>
+        </div>
+
+        <div class="border-t border-white/5 mt-7 pt-5 flex items-center justify-center gap-2 text-xs text-slate-500">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <rect x="4" y="10" width="16" height="11" rx="2"/>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+          </svg>
+          تتم المصادقة عبر خدمة Supabase
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="border-t border-white/5 px-5 py-5">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+      <span>© <span id="currentYear"></span> SuperPedia. جميع الحقوق محفوظة.</span>
+      <span>المعرفة مسؤولية، والمصداقية أساسها.</span>
+    </div>
+  </footer>
+
+  <script>
+    'use strict';
+
+    /*
+      ======================================================
+      إعدادات Supabase
+      استبدل القيم التالية ببيانات مشروعك الحقيقية.
+      لا تضع service_role أو أي مفتاح سري في هذا الملف.
+      ======================================================
+    */
+
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
+
+    /*
+      غيّر هذه القيمة إلى صفحة مناسبة موجودة في مشروعك.
+      لا يُسمح بإعادة التوجيه إلى نطاق خارجي.
+    */
+    const DEFAULT_REDIRECT = 'index.html';
+
+    const configIsValid =
+      /^https:\/\/[a-zA-Z0-9-]+\.supabase\.co$/.test(SUPABASE_URL) &&
+      SUPABASE_PUBLISHABLE_KEY !== 'YOUR_SUPABASE_PUBLISHABLE_KEY' &&
+      SUPABASE_PUBLISHABLE_KEY.trim().length > 0;
+
+    let supabaseClient = null;
+    let currentMode = 'login';
+    let busy = false;
+    let recoveryMode = false;
+
+    const $ = (id) => document.getElementById(id);
+
+    $('currentYear').textContent = new Date().getFullYear();
+
+    const authPanel = $('authPanel');
+    const sessionPanel = $('sessionPanel');
+    const notice = $('notice');
+
+    function showNotice(message, type = 'info') {
+      notice.className = 'notice ' + type + ' mb-5';
+      notice.textContent = message;
+      notice.classList.remove('hidden-panel');
+    }
+
+    function hideNotice() {
+      notice.textContent = '';
+      notice.classList.add('hidden-panel');
+    }
+
+    function showConfigWarning(message) {
+      $('configWarning').textContent = message;
+      $('configWarning').classList.remove('hidden-panel');
+    }
+
+    function hideConfigWarning() {
+      $('configWarning').classList.add('hidden-panel');
+    }
+
+    function setBusy(button, isBusy, label) {
+      if (isBusy) {
+        button.disabled = true;
+        button.dataset.originalText = button.textContent;
+        button.innerHTML = '<span class="spinner" aria-hidden="true"></span> ' + label;
+      } else {
+        button.disabled = false;
+        button.textContent = button.dataset.originalText || label;
+      }
+    }
+
+    function validEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) &&
+        email.length <= 254;
+    }
+
+    function passwordIsValid(password) {
+      return typeof password === 'string' &&
+        password.length >= 8 &&
+        password.length <= 128;
+    }
+
+    function safeRedirectTarget() {
+      const params = new URLSearchParams(window.location.search);
+      const requested = params.get('next');
+
+      if (!requested) return DEFAULT_REDIRECT;
+
+      try {
+        const target = new URL(requested, window.location.href);
+
+        if (target.origin !== window.location.origin) {
+          return DEFAULT_REDIRECT;
+        }
+
+        if (target.pathname.endsWith('/auth.html')) {
+          return DEFAULT_REDIRECT;
+        }
+
+        return target.pathname + target.search + target.hash;
+      } catch {
+        return DEFAULT_REDIRECT;
+      }
+    }
+
+    function goToDestination() {
+      window.location.replace(safeRedirectTarget());
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      hideNotice();
+
+      $('loginForm').classList.toggle('hidden-panel', mode !== 'login');
+      $('signupForm').classList.toggle('hidden-panel', mode !== 'signup');
+      $('resetForm').classList.toggle('hidden-panel', mode !== 'reset');
+      $('newPasswordForm').classList.add('hidden-panel');
+
+      $('tabs').classList.toggle('hidden-panel', mode === 'reset');
+      $('pageTitle').textContent =
+        mode === 'signup' ? 'أنشئ حسابك الجديد' :
+        mode === 'reset' ? 'استعادة كلمة المرور' :
+        'مرحباً بعودتك';
+
+      $('pageSubtitle').textContent =
+        mode === 'signup' ? 'أنشئ حساباً لتبدأ رحلتك المعرفية.' :
+        mode === 'reset' ? 'أدخل بريدك الإلكتروني للحصول على رابط الاستعادة.' :
+        'سجّل دخولك لمتابعة رحلتك المعرفية.';
+
+      $('loginTab').classList.toggle('active', mode === 'login');
+      $('signupTab').classList.toggle('active', mode === 'signup');
+
+      if (mode === 'reset') {
+        $('resetEmail').value = $('loginEmail').value.trim();
+      }
+    }
+
+    function displayRecoveryForm() {
+      recoveryMode = true;
+      hideNotice();
+      authPanel.classList.remove('hidden-panel');
+      sessionPanel.classList.add('hidden-panel');
+      $('tabs').classList.add('hidden-panel');
+      $('loginForm').classList.add('hidden-panel');
+      $('signupForm').classList.add('hidden-panel');
+      $('resetForm').classList.add('hidden-panel');
+      $('newPasswordForm').classList.remove('hidden-panel');
+      $('pageTitle').textContent = 'تعيين كلمة مرور جديدة';
+      $('pageSubtitle').textContent = 'اختر كلمة مرور جديدة وآمنة لحسابك.';
+    }
+
+    function displaySession(user) {
+      authPanel.classList.add('hidden-panel');
+      sessionPanel.classList.remove('hidden-panel');
+      $('sessionEmail').textContent = user.email || 'تم تسجيل الدخول';
+      $('pageTitle').textContent = 'مرحباً بك';
+      $('pageSubtitle').textContent = 'أصبحت جلستك نشطة.';
+    }
+
+    function displayAuthForms() {
+      sessionPanel.classList.add('hidden-panel');
+      authPanel.classList.remove('hidden-panel');
+    }
+
+    function translateError(error) {
+      const message = String(error?.message || '').toLowerCase();
+
+      if (message.includes('invalid login credentials')) {
+        return 'بيانات الدخول غير صحيحة، تحقق من البريد الإلكتروني وكلمة المرور.';
+      }
+
+      if (message.includes('email not confirmed')) {
+        return 'لم يتم تأكيد بريدك الإلكتروني بعد. افتح رسالة التأكيد ثم حاول مجدداً.';
+      }
+
+      if (message.includes('user already registered')) {
+        return 'هذا البريد مسجّل بالفعل. حاول تسجيل الدخول بدلاً من إنشاء حساب جديد.';
+      }
+
+      if (message.includes('password should be at least')) {
+        return 'كلمة المرور لا تحقق الحد الأدنى المطلوب.';
+      }
+
+      if (message.includes('password')) {
+        return 'تعذر قبول كلمة المرور. تحقق من شروط كلمة المرور في إعدادات المشروع.';
+      }
+
+      if (message.includes('rate limit') || message.includes('too many requests')) {
+        return 'أُجريت طلبات كثيرة خلال فترة قصيرة. انتظر قليلاً ثم حاول مجدداً.';
+      }
+
+      if (message.includes('network') || message.includes('fetch')) {
+        return 'تعذر الاتصال بالخادم. تحقق من اتصال الإنترنت وحاول مجدداً.';
+      }
+
+      if (message.includes('email')) {
+        return 'تعذر إكمال العملية باستخدام هذا البريد الإلكتروني. تحقق من البيانات وإعدادات البريد.';
+      }
+
+      return 'تعذر إكمال العملية. تحقق من البيانات وإعدادات Supabase ثم حاول مجدداً.';
+    }
+
+    function clearAuthHash() {
+      const url = new URL(window.location.href);
+      url.hash = '';
+      window.history.replaceState({}, document.title, url.pathname + url.search);
+    }
+
+    async function init() {
+      if (!configIsValid) {
+        showConfigWarning(
+          'لم يتم إعداد اتصال Supabase. افتح auth.html واستبدل SUPABASE_URL وSUPABASE_PUBLISHABLE_KEY ببيانات مشروعك.'
+        );
+        $('loginButton').disabled = true;
+        $('signupButton').disabled = true;
+        $('resetButton').disabled = true;
+        $('newPasswordButton').disabled = true;
+        return;
+      }
+
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        showConfigWarning('تعذر تحميل مكتبة Supabase. تحقق من الاتصال بالإنترنت ثم أعد تحميل الصفحة.');
+        return;
+      }
+
+      supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            storage: localStorage
+          }
+        }
+      );
+
+      /*
+        تهيئة وضع استعادة كلمة المرور.
+        تُعالج روابط الاستعادة التي ترسلها Supabase إلى auth.html.
+      */
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const queryParams = new URLSearchParams(window.location.search);
+
+      if (
+        hashParams.get('type') === 'recovery' ||
+        queryParams.get('mode') === 'recovery'
+      ) {
+        displayRecoveryForm();
+      }
+
+      /*
+        فحص الجلسة الحالية وإعادة تحديث الواجهة عند تغيرها.
+      */
+      const { data, error } = await supabaseClient.auth.getSession();
+
+      if (error) {
+        showNotice('تعذر التحقق من الجلسة الحالية. يمكنك المحاولة مجدداً.', 'error');
+      } else if (data.session && !recoveryMode) {
+        displaySession(data.session.user);
+      }
+
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          displayRecoveryForm();
+          return;
+        }
+
+        if (event === 'SIGNED_OUT') {
+          recoveryMode = false;
+          displayAuthForms();
+          switchMode('login');
+          return;
+        }
+
+        if (event === 'SIGNED_IN' && session && !recoveryMode) {
+          displaySession(session.user);
+        }
+      });
+
+      hideConfigWarning();
+    }
+
+    /*
+      التبديل بين تسجيل الدخول وإنشاء الحساب.
+    */
+    $('loginTab').addEventListener('click', () => switchMode('login'));
+    $('signupTab').addEventListener('click', () => switchMode('signup'));
+
+    /*
+      إظهار كلمة المرور أو إخفاؤها.
+    */
+    document.querySelectorAll('[data-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const input = $(button.dataset.toggle);
+        const visible = input.type === 'password';
+
+        input.type = visible ? 'text' : 'password';
+        button.textContent = visible ? 'إخفاء' : 'إظهار';
+      });
+    });
+
+    /*
+      تسجيل الدخول بالبريد الإلكتروني وكلمة المرور.
+    */
+    $('loginForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!supabaseClient || busy) return;
+
+      hideNotice();
+
+      const email = $('loginEmail').value.trim();
+      const password = $('loginPassword').value;
+
+      if (!validEmail(email)) {
+        showNotice('أدخل بريداً إلكترونياً صحيحاً.', 'error');
+        $('loginEmail').focus();
+        return;
+      }
+
+      if (!password || password.length > 128) {
+        showNotice('أدخل كلمة المرور بصورة صحيحة.', 'error');
+        $('loginPassword').focus();
+        return;
+      }
+
+      busy = true;
+      setBusy($('loginButton'), true, 'جارٍ تسجيل الدخول...');
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        if (!data.session) {
+          showNotice('تم استلام الطلب، لكن لم تُنشأ جلسة دخول. تحقق من تأكيد البريد الإلكتروني.', 'info');
+          return;
+        }
+
+        showNotice('تم تسجيل الدخول بنجاح. جارٍ الانتقال...', 'success');
+        window.location.assign(safeRedirectTarget());
+      } catch (error) {
+        showNotice(translateError(error), 'error');
+      } finally {
+        busy = false;
+        setBusy($('loginButton'), false, 'تسجيل الدخول');
+      }
+    });
+
+    /*
+      إنشاء حساب جديد.
+      يُحفظ الاسم كبيانات وصفية في حساب Auth.
+    */
+    $('signupForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!supabaseClient || busy) return;
+
+      hideNotice();
+
+      const name = $('signupName').value.trim();
+      const email = $('signupEmail').value.trim();
+      const password = $('signupPassword').value;
+      const confirmation = $('confirmPassword').value;
+
+      if (name.length < 2 || name.length > 80) {
+        showNotice('يجب أن يتراوح الاسم بين حرفين و80 حرفاً.', 'error');
+        $('signupName').focus();
+        return;
+      }
+
+      if (!validEmail(email)) {
+        showNotice('أدخل بريداً إلكترونياً صحيحاً.', 'error');
+        $('signupEmail').focus();
+        return;
+      }
+
+      if (!passwordIsValid(password)) {
+        showNotice('يجب أن تتراوح كلمة المرور بين 8 و128 محرفاً، مع مراعاة سياسة كلمات المرور في مشروعك.', 'error');
+        $('signupPassword').focus();
+        return;
+      }
+
+      if (password !== confirmation) {
+        showNotice('كلمتا المرور غير متطابقتين.', 'error');
+        $('confirmPassword').focus();
+        return;
+      }
+
+      if (!$('acceptTerms').checked) {
+        showNotice('يجب الموافقة على شروط الاستخدام وسياسة الخصوصية.', 'error');
+        $('acceptTerms').focus();
+        return;
+      }
+
+      busy = true;
+      setBusy($('signupButton'), true, 'جارٍ إنشاء الحساب...');
+
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: name
+            },
+            emailRedirectTo: new URL('auth.html', window.location.href).href
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.session) {
+          showNotice('تم إنشاء حسابك بنجاح.', 'success');
+          window.location.assign(safeRedirectTarget());
+        } else {
+          showNotice(
+            'تم إرسال طلب إنشاء الحساب. إذا كان تأكيد البريد مفعلاً، افتح رسالة التأكيد التي وصلتك قبل تسجيل الدخول.',
+            'success'
+          );
+          $('signupForm').reset();
+          updatePasswordStrength('');
+        }
+      } catch (error) {
+        showNotice(translateError(error), 'error');
+      } finally {
+        busy = false;
+        setBusy($('signupButton'), false, 'إنشاء حساب جديد');
+      }
+    });
+
+    /*
+      طلب إعادة تعيين كلمة المرور.
+    */
+    $('forgotButton').addEventListener('click', () => {
+      switchMode('reset');
+    });
+
+    $('backToLogin').addEventListener('click', () => {
+      switchMode('login');
+    });
+
+    $('resetForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!supabaseClient || busy) return;
+
+      hideNotice();
+
+      const email = $('resetEmail').value.trim();
+
+      if (!validEmail(email)) {
+        showNotice('أدخل البريد الإلكتروني المرتبط بحسابك.', 'error');
+        $('resetEmail').focus();
+        return;
+      }
+
+      busy = true;
+      setBusy($('resetButton'), true, 'جارٍ إرسال الرابط...');
+
+      try {
+        const redirectTo = new URL('auth.html?mode=recovery', window.location.href).href;
+
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo
+        });
+
+        if (error) throw error;
+
+        showNotice(
+          'إذا كان البريد مرتبطاً بحساب يسمح بالاستعادة، فستصلك رسالة تحتوي على رابط إعادة تعيين كلمة المرور. تحقق من صندوق الوارد والبريد غير المرغوب فيه.',
+          'success'
+        );
+      } catch (error) {
+        showNotice(translateError(error), 'error');
+      } finally {
+        busy = false;
+        setBusy($('resetButton'), false, 'إرسال رابط الاستعادة');
+      }
+    });
+
+    /*
+      حفظ كلمة مرور جديدة بعد فتح رابط الاستعادة.
+    */
+    $('newPasswordForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!supabaseClient || busy) return;
+
+      hideNotice();
+
+      const password = $('newPassword').value;
+      const confirmation = $('newPasswordConfirm').value;
+
+      if (!passwordIsValid(password)) {
+        showNotice('يجب أن تتراوح كلمة المرور الجديدة بين 8 و128 محرفاً.', 'error');
+        $('newPassword').focus();
+        return;
+      }
+
+      if (password !== confirmation) {
+        showNotice('كلمتا المرور غير متطابقتين.', 'error');
+        $('newPasswordConfirm').focus();
+        return;
+      }
+
+      busy = true;
+      setBusy($('newPasswordButton'), true, 'جارٍ حفظ كلمة المرور...');
+
+      try {
+        const { error } = await supabaseClient.auth.updateUser({
+          password
+        });
+
+        if (error) throw error;
+
+        recoveryMode = false;
+        clearAuthHash();
+
+        $('newPasswordForm').reset();
+        switchMode('login');
+
+        showNotice('تم تحديث كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.', 'success');
+      } catch (error) {
+        showNotice(translateError(error), 'error');
+      } finally {
+        busy = false;
+        setBusy($('newPasswordButton'), false, 'حفظ كلمة المرور الجديدة');
+      }
+    });
+
+    /*
+      مؤشر تقريبي لقوة كلمة المرور.
+      لا يستبدل سياسة كلمات المرور على الخادم.
+    */
+    function updatePasswordStrength(password) {
+      let score = 0;
+
+      if (password.length >= 8) score++;
+      if (password.length >= 12) score++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+      if (/\d/.test(password)) score++;
+      if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+      const fill = $('strengthFill');
+      const label = $('strengthText');
+
+      const levels = [
+        { width: '0%', color: '#263247', text: 'قوة كلمة المرور' },
+        { width: '20%', color: '#f87171', text: 'ضعيفة جداً' },
+        { width: '40%', color: '#fb923c', text: 'ضعيفة' },
+        { width: '60%', color: '#facc15', text: 'متوسطة' },
+        { width: '80%', color: '#4ade80', text: 'جيدة' },
+        { width: '100%', color: '#2dd4bf', text: 'قوية' }
+      ];
+
+      const level = password.length === 0 ? 0 : Math.max(1, score);
+
+      fill.style.width = levels[level].width;
+      fill.style.background = levels[level].color;
+      label.textContent = levels[level].text;
+    }
+
+    $('signupPassword').addEventListener('input', (event) => {
+      updatePasswordStrength(event.target.value);
+    });
+
+    /*
+      الانتقال إلى الصفحة الرئيسية أو الوجهة الآمنة.
+    */
+    $('continueButton').addEventListener('click', () => {
+      goToDestination();
+    });
+
+    /*
+      تسجيل الخروج.
+    */
+    $('logoutButton').addEventListener('click', async () => {
+      if (!supabaseClient || busy) return;
+
+      hideNotice();
+      busy = true;
+      setBusy($('logoutButton'), true, 'جارٍ تسجيل الخروج...');
+
+      try {
+        const { error } = await supabaseClient.auth.signOut();
+
+        if (error) throw error;
+
+        recoveryMode = false;
+        displayAuthForms();
+        switchMode('login');
+        showNotice('تم تسجيل الخروج بنجاح.', 'success');
+      } catch (error) {
+        showNotice(translateError(error), 'error');
+      } finally {
+        busy = false;
+        setBusy($('logoutButton'), false, 'تسجيل الخروج');
+      }
+    });
+
+    /*
+      تشغيل الصفحة.
+    */
+    init().catch((error) => {
+      console.error('Auth initialization failed:', error);
+      showConfigWarning(
+        'تعذر تهيئة المصادقة. تحقق من إعدادات Supabase والاتصال بالإنترنت.'
+      );
+    });
+  </script>
+</body>
+</html>
