@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="سوبر بيديا، موسوعة معرفية وتقنية عربية. اكتشف العلوم والتاريخ والتقنية والثقافة.">
+  <title>SuperPedia | الموسوعة المعرفية العربية</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { tajawal: ['Tajawal', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; color-scheme: dark; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 15% 0%, #4338ca22, transparent 38%),
+        radial-gradient(ellipse at 90% 40%, #0f766e16, transparent 35%),
+        #080d18;
+      color: #f1f5f9;
+      font-family: Tajawal, sans-serif;
+    }
+
+    .glass {
+      background: rgba(16,24,39,.83);
+      border: 1px solid rgba(148,163,184,.13);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-link {
+      color: #a5b4c8;
+      transition: color .2s;
+    }
+
+    .nav-link:hover { color: white; }
+
+    .hero-grid {
+      background-image:
+        linear-gradient(#ffffff07 1px, transparent 1px),
+        linear-gradient(90deg, #ffffff07 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: linear-gradient(to bottom, black, transparent);
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg,#5eead4,#a5b4fc 70%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .search-field {
+      width: 100%;
+      background: #0b1220;
+      border: 1px solid #334155;
+      border-radius: 15px;
+      padding: 16px 48px 16px 15px;
+      color: white;
+      outline: none;
+    }
+
+    .search-field:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px #818cf81c;
+    }
+
+    .category-card, .article-card {
+      transition: transform .2s, border-color .2s, background .2s;
+    }
+
+    .category-card:hover, .article-card:hover {
+      transform: translateY(-3px);
+      border-color: #818cf866;
+      background-color: #172033;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: linear-gradient(110deg,#818cf8,#6366f1);
+      color: white;
+      font-weight: 800;
+      transition: transform .2s, opacity .2s;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      transition: background .2s;
+    }
+
+    .btn-secondary:hover { background: #ffffff0b; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #64748b33;
+      background: #64748b13;
+      color: #cbd5e1;
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 12px;
+    }
+
+    .hidden-panel { display: none !important; }
+
+    :focus-visible {
+      outline: 2px solid #a5b4fc;
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,*::before,*::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- شريط التنقل -->
+  <header class="sticky top-0 z-40 border-b border-white/5 bg-[#080d18]/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <a href="index.html" class="flex items-center gap-3 text-white no-underline">
+        <div class="w-11 h-11 rounded-2xl bg-indigo-400/10 border border-indigo-300/20 flex items-center justify-center">
+          <svg viewBox="0 0 40 40" width="29" height="29" fill="none" aria-hidden="true">
+            <path d="M7 11L20 4L33 11V29L20 36L7 29V11Z" stroke="#A5B4FC" stroke-width="2"/>
+            <path d="M13 25V15L20 22L27 15V25" stroke="#5EEAD4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="font-extrabold text-xl leading-tight">SuperPedia</div>
+          <div class="text-xs text-slate-400 mt-1">الموسوعة المعرفية العربية</div>
+        </div>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-7 text-sm">
+        <a href="#home" class="nav-link">الرئيسية</a>
+        <a href="#categories" class="nav-link">التصنيفات</a>
+        <a href="#articles" class="nav-link">المقالات</a>
+        <a href="#about" class="nav-link">عن الموسوعة</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <a id="loginLink" href="auth.html" class="btn-primary text-sm">تسجيل الدخول</a>
+        <a id="profileLink" href="auth.html" class="btn-secondary text-sm hidden-panel">حسابي</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- الواجهة الرئيسية -->
+    <section id="home" class="relative overflow-hidden">
+      <div class="hero-grid absolute inset-0 pointer-events-none"></div>
+
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-20">
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 rounded-full px-4 py-2 glass text-indigo-200 text-sm mb-7">
+            <span class="w-2 h-2 rounded-full bg-teal-300"></span>
+            المعرفة العربية في مساحة واحدة
+          </div>
+
+          <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-tight">
+            اكتشف المعرفة،
+            <span class="gradient-text">واصنع آفاقاً جديدة.</span>
+          </h1>
+
+          <p class="text-slate-400 text-lg sm:text-xl leading-9 max-w-2xl mx-auto mt-7">
+            سوبر بيديا موسوعة معرفية وتقنية عربية تهدف إلى جمع المعلومات
+            وتنظيمها وتقديمها في تجربة واضحة وسهلة الاستخدام.
+          </p>
+
+          <form id="searchForm" class="max-w-2xl mx-auto mt-9 relative">
+            <svg class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="M20 20L16 16"/>
+            </svg>
+            <input id="searchInput" class="search-field" type="search" placeholder="ابحث عن العلوم، التاريخ، التقنية..." aria-label="البحث في الموسوعة">
+            <button class="absolute left-2 top-1/2 -translate-y-1/2 btn-primary py-2 px-4" type="submit">ابحث</button>
+          </form>
+
+          <div class="flex flex-wrap items-center justify-center gap-2 mt-5 text-sm text-slate-400">
+            <span>موضوعات مقترحة:</span>
+            <button class="tag search-suggestion" type="button">الذكاء الاصطناعي</button>
+            <button class="tag search-suggestion" type="button">التاريخ</button>
+            <button class="tag search-suggestion" type="button">الأمن السيبراني</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto mt-16">
+          <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl font-extrabold text-indigo-300">معرفة</div>
+            <div class="text-sm text-slate-400 mt-2">محتوى منظم وسهل الوصول</div>
+          </div>
+          <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl font-extrabold text-teal-300">تقنية</div>
+            <div class="text-sm text-slate-400 mt-2">علوم وأدوات العصر الرقمي</div>
+          </div>
+          <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl font-extrabold text-violet-300">ثقافة</div>
+            <div class="text-sm text-slate-400 mt-2">تاريخ وأدب وفكر إنساني</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- التصنيفات -->
+    <section id="categories" class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+        <div>
+          <p class="text-indigo-300 font-bold text-sm mb-2">تصفّح المعرفة</p>
+          <h2 class="text-3xl font-extrabold">التصنيفات الرئيسية</h2>
+          <p class="text-slate-400 mt-3">اختر المجال الذي ترغب في استكشافه.</p>
+        </div>
+      </div>
+
+      <div id="categoryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="علوم">
+          <span class="text-3xl">⚛️</span>
+          <h3 class="font-bold text-lg mt-4">العلوم</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">الفيزياء والكيمياء والأحياء والفضاء.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="تقنية">
+          <span class="text-3xl">⌘</span>
+          <h3 class="font-bold text-lg mt-4">التقنية</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">البرمجة والذكاء الاصطناعي والأمن الرقمي.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="تاريخ">
+          <span class="text-3xl">🏛️</span>
+          <h3 class="font-bold text-lg mt-4">التاريخ</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">الحضارات والأحداث والشخصيات التاريخية.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="ثقافة">
+          <span class="text-3xl">📚</span>
+          <h3 class="font-bold text-lg mt-4">الثقافة والأدب</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">اللغة والأدب والفنون والفكر.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="جغرافيا">
+          <span class="text-3xl">🌍</span>
+          <h3 class="font-bold text-lg mt-4">الجغرافيا</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">البلدان والطبيعة والبيئة.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="صحة">
+          <span class="text-3xl">✚</span>
+          <h3 class="font-bold text-lg mt-4">الصحة</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">المعارف الصحية والتوعية العامة.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="تعليم">
+          <span class="text-3xl">🎓</span>
+          <h3 class="font-bold text-lg mt-4">التعليم</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">التعلّم والمهارات والبحث العلمي.</p>
+        </button>
+        <button class="category-card glass rounded-2xl p-5 text-right" data-category="مجتمع">
+          <span class="text-3xl">◎</span>
+          <h3 class="font-bold text-lg mt-4">المجتمع</h3>
+          <p class="text-sm text-slate-400 mt-2 leading-6">المجتمع والقانون والتنمية الإنسانية.</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- المقالات -->
+    <section id="articles" class="border-y border-white/5 bg-white/[0.015]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <div>
+            <p class="text-teal-300 font-bold text-sm mb-2">مكتبة الموسوعة</p>
+            <h2 class="text-3xl font-extrabold">المقالات المنشورة</h2>
+            <p class="text-slate-400 mt-3">تظهر هنا المقالات المنشورة في قاعدة بيانات الموسوعة.</p>
+          </div>
+          <a href="submit.html" id="submitLink" class="btn-secondary">إضافة مقال +</a>
+        </div>
+
+        <div id="articleStatus" class="text-sm text-slate-400 mb-5" role="status" aria-live="polite">
+          جارٍ تحميل المقالات...
+        </div>
+
+        <div id="articleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+        <div id="emptyState" class="hidden-panel glass rounded-2xl p-10 text-center">
+          <div class="text-4xl mb-4">📖</div>
+          <h3 class="text-xl font-bold">لا توجد مقالات مطابقة</h3>
+          <p class="text-slate-400 mt-2">جرّب البحث بكلمات أخرى أو اختر تصنيفاً مختلفاً.</p>
+          <button id="clearSearch" class="btn-secondary mt-5" type="button">عرض المقالات المنشورة</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- عن الموسوعة -->
+    <section id="about" class="max-w-7xl mx-auto px-4 sm:px-6 py-20">
+      <div class="glass rounded-3xl p-7 sm:p-12 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <p class="text-indigo-300 font-bold text-sm mb-3">عن SuperPedia</p>
+          <h2 class="text-3xl sm:text-4xl font-extrabold leading-tight">موسوعة عربية تنمو بالمعرفة.</h2>
+        </div>
+        <div>
+          <p class="text-slate-400 leading-9">
+            نعمل على بناء مساحة معرفية عربية تجمع المعلومات في تصنيفات واضحة،
+            وتتيح نشر المقالات ومراجعتها والتحقق منها. هدفنا هو تسهيل الوصول إلى
+            المعرفة، مع الاهتمام بجودة المحتوى ومصداقية المصادر.
+          </p>
+          <a href="auth.html" class="btn-primary mt-6">انضم إلى الموسوعة</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+      <span>© <span id="year"></span> SuperPedia</span>
+      <div class="flex gap-5">
+        <a href="auth.html" class="hover:text-white">الحساب</a>
+        <a href="#about" class="hover:text-white">عن الموسوعة</a>
+        <a href="#home" class="hover:text-white">العودة للأعلى ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    'use strict';
+
+    // بيانات مشروع SuperPedia
+    const SUPABASE_URL = 'https://sroxejvzhheaqwciwpye.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_6OSenzq9hZw6CX9j6BvlEw_WkH4Qkxr';
+
+    const $ = id => document.getElementById(id);
+
+    $('year').textContent = new Date().getFullYear();
+
+    let db = null;
+    let allArticles = [];
+    let activeCategory = '';
+    let currentSearch = '';
+
+    /*
+      إعداد قاعدة المقالات:
+      يفترض هذا الملف وجود جدول public.articles بالأعمدة:
+      id, title, slug, excerpt, content, category, tags,
+      status, created_at.
+
+      إذا كانت أسماء أعمدتك مختلفة، عدّل الاستعلام ودالة العرض
+      لتطابق مخطط قاعدة البيانات الفعلي.
+    */
+
+    function safeText(value) {
+      return String(value ?? '');
+    }
+
+    function makeArticleLink(article) {
+      const slug = safeText(article.slug).trim();
+      const id = safeText(article.id).trim();
+
+      // لا نستخدم HTML عشوائياً من قاعدة البيانات داخل الصفحة.
+      const query = slug || id;
+      return 'article.html?id=' + encodeURIComponent(query);
+    }
+
+    function renderArticles(articles) {
+      const grid = $('articleGrid');
+      grid.replaceChildren();
+
+      for (const article of articles) {
+        const card = document.createElement('article');
+        card.className = 'article-card glass rounded-2xl p-6';
+
+        const category = document.createElement('span');
+        category.className = 'tag';
+        category.textContent = safeText(article.category || 'عام');
+
+        const title = document.createElement('h3');
+        title.className = 'text-xl font-extrabold leading-8 mt-4';
+        title.textContent = safeText(article.title || 'مقال دون عنوان');
+
+        const excerpt = document.createElement('p');
+        excerpt.className = 'text-slate-400 leading-7 mt-3';
+        excerpt.textContent = safeText(
+          article.excerpt ||
+          (article.content ? article.content.slice(0, 150) + '…' : 'اقرأ المقال لمعرفة المزيد.')
+        ).slice(0, 240);
+
+        const footer = document.createElement('div');
+        footer.className = 'flex items-center justify-between gap-3 mt-6 pt-4 border-t border-white/5';
+
+        const date = document.createElement('span');
+        date.className = 'text-xs text-slate-500';
+
+        if (article.created_at && !Number.isNaN(Date.parse(article.created_at))) {
+          date.textContent = new Date(article.created_at).toLocaleDateString('ar');
+        } else {
+          date.textContent = 'سوبر بيديا';
+        }
+
+        const link = document.createElement('a');
+        link.className = 'text-sm text-indigo-300 hover:text-white font-bold';
+        link.href = makeArticleLink(article);
+        link.textContent = 'قراءة المقال ←';
+
+        footer.append(date, link);
+        card.append(category, title, excerpt, footer);
+        grid.append(card);
+      }
+
+      $('emptyState').classList.toggle('hidden-panel', articles.length !== 0);
+    }
+
+    function filterArticles() {
+      const term = currentSearch.trim().toLocaleLowerCase('ar');
+      const results = allArticles.filter(article => {
+        const searchable = [
+          article.title,
+          article.excerpt,
+          article.content,
+          article.category,
+          Array.isArray(article.tags) ? article.tags.join(' ') : article.tags
+        ].map(safeText).join(' ').toLocaleLowerCase('ar');
+
+        const matchesSearch = !term || searchable.includes(term);
+        const matchesCategory = !activeCategory ||
+          safeText(article.category).toLocaleLowerCase('ar') === activeCategory.toLocaleLowerCase('ar');
+
+        return matchesSearch && matchesCategory;
+      });
+
+      renderArticles(results);
+
+      if (allArticles.length === 0) {
+        $('articleStatus').textContent = 'لا توجد مقالات منشورة حالياً.';
+      } else {
+        $('articleStatus').textContent =
+          'عدد المقالات المطابقة: ' + results.length;
+      }
+    }
+
+    async function loadArticles() {
+      if (!db) {
+        $('articleStatus').textContent =
+          'تعذر الاتصال بقاعدة البيانات. تحقق من إعدادات Supabase.';
+        return;
+      }
+
+      $('articleStatus').textContent = 'جارٍ تحميل المقالات...';
+
+      try {
+        const { data, error } = await db
+          .from('articles')
+          .select('id,title,slug,excerpt,content,category,tags,status,created_at')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(60);
+
+        if (error) throw error;
+
+        allArticles = data || [];
+        filterArticles();
+      } catch (error) {
+        console.error('Article loading failed:', error);
+        allArticles = [];
+        renderArticles([]);
+        $('articleStatus').textContent =
+          'تعذر تحميل المقالات. تحقق من وجود جدول articles وأسماء الأعمدة وسياسات RLS.';
+        $('emptyState').classList.add('hidden-panel');
+      }
+    }
+
+    $('searchForm').addEventListener('submit', event => {
+      event.preventDefault();
+      currentSearch = $('searchInput').value.trim();
+      activeCategory = '';
+      filterArticles();
+      $('articles').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    document.querySelectorAll('.search-suggestion').forEach(button => {
+      button.addEventListener('click', () => {
+        $('searchInput').value = button.textContent.trim();
+        currentSearch = button.textContent.trim();
+        activeCategory = '';
+        filterArticles();
+        $('articles').scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    document.querySelectorAll('[data-category]').forEach(button => {
+      button.addEventListener('click', () => {
+        activeCategory = button.dataset.category;
+        currentSearch = '';
+        $('searchInput').value = '';
+        filterArticles();
+        $('articles').scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    $('clearSearch').addEventListener('click', () => {
+      currentSearch = '';
+      activeCategory = '';
+      $('searchInput').value = '';
+      filterArticles();
+    });
+
+    async function init() {
+      if (!window.supabase?.createClient) {
+        $('articleStatus').textContent =
+          'تعذر تحميل مكتبة Supabase. تحقق من الإنترنت.';
+        return;
+      }
+
+      db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+      const { data, error } = await db.auth.getSession();
+
+      if (!error && data.session) {
+        $('loginLink').classList.add('hidden-panel');
+        $('profileLink').classList.remove('hidden-panel');
+        $('profileLink').href = 'auth.html';
+        $('profileLink').textContent = 'حسابي';
+      }
+
+      db.auth.onAuthStateChange((event, session) => {
+        $('loginLink').classList.toggle('hidden-panel', !!session);
+        $('profileLink').classList.toggle('hidden-panel', !session);
+      });
+
+      await loadArticles();
+    }
+
+    init().catch(error => {
+      console.error('Initialization failed:', error);
+      $('articleStatus').textContent = 'حدث خطأ أثناء تشغيل الموسوعة.';
+    });
+  </script>
+</body>
+</html>
